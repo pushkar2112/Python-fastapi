@@ -12,15 +12,22 @@ class Post(BaseModel):
     published: bool = True
     rating: Optional[int] = None # Optional Field Defaults to None
 
+# Temporary post storage
+my_posts = [
+    {"title": "title of post1", "content": "content of post1", "id": 1},
+    {"title": "title of post2", "content": "content of post2", "id": 2}
+    ]
+
+# Api routes
 @app.get("/")
 def root():
     return {"message": "Hello World"}
 
 @app.get("/posts")
 def get_posts():
-    return {"data": "This is your post"}
+    return {"data": my_posts}
 
-@app.post("/createposts")
+@app.post("/posts")
 # import Body to fetch the data from the request body
 def create_posts(post: Post): # ... means that the data is required to be passed
     print(post)
