@@ -2,6 +2,7 @@ from typing import Optional
 from fastapi import FastAPI
 from fastapi.params import Body
 from pydantic import BaseModel
+from random import randrange
 
 app = FastAPI()
 
@@ -18,6 +19,11 @@ my_posts = [
     {"title": "title of post2", "content": "content of post2", "id": 2}
     ]
 
+def find_post(id):
+    for p in my_posts:
+        if p["id"] == id:
+            return p
+
 # Api routes
 @app.get("/")
 def root():
@@ -28,9 +34,14 @@ def get_posts():
     return {"data": my_posts}
 
 @app.post("/posts")
-# import Body to fetch the data from the request body
-def create_posts(post: Post): # ... means that the data is required to be passed
+def create_posts(post: Post):
+    post_dict = post.dict()
+    post_dict['id'] = randrange(0, 10000000)
+    my_posts.append(post_dict)
+    return {"data": post_dict} # return the data
+
+@app.get("/posts/{id}") # path parameter
+def get_post(id: int):
+    post = find_post(id)
     print(post)
-    print(post.dict())
-    return {"data": post} # return the data
-# title str, content str
+    return {"post_details": post}
