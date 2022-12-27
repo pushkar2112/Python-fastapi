@@ -50,3 +50,15 @@ def get_post(id: int, response: Response):
         # return {"message": f"post with id: {id} was not found!!"}
 
     return {"post_details": post}
+
+@app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_posts(id: int, response: Response):
+    #deleting post
+    try:
+        post_index = my_posts.index(find_post(id))
+    except:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post does not exists!!")
+    
+    del my_posts[post_index]
+# We do not return a message!
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
