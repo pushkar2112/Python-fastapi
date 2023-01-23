@@ -8,18 +8,13 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
 from sqlalchemy.orm import Session
-from . import models
+from . import models, schemas
 from .database import engine, get_db
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# Pydantic model to validate the data
-class Post(BaseModel):
-    title: str
-    content: str
-    published: bool = True
 
 # DB Connection
 while True:
@@ -49,12 +44,6 @@ def find_post(id):
 def root():
     return {"message": "Hello World"}
 
-@app.get("/sqlalchemy")
-def test_posts(db: Session = Depends(get_db)):
-    posts = db.query(models.Post).all()
-
-    return {"data" : posts}
-
 @app.get("/posts")
 def get_posts(db: Session = Depends(get_db)):
     # cursor.execute('''Select * from posts''')
@@ -63,7 +52,7 @@ def get_posts(db: Session = Depends(get_db)):
     return {"data": posts}
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED) # add status code to the decorator for default values
-def create_posts(post: Post, db: Session = Depends(get_db)):
+def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
     # DO NOT USE FSTRINGS: they make us vulnerable to SQL Injection attacks
     # cursor.execute("""Insert into posts (title, content, published, owner_id) values (%s, %s, %s, 11) returning * """,(post.title, post.content, post.published))
 
@@ -111,7 +100,7 @@ def delete_posts(id: int, response: Response, db: Session = Depends(get_db)):
 # Put method requires all the fields to be sent again
 # whereas the patch method requires for only the changed ones
 @app.put("/posts/{id}")
-def update_post(id: int, updated_post: Post, db: Session = Depends(get_db)):
+def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
     
     # cursor.execute("update posts set title = %s, content = %s, published = %s, owner_id = 11 where id = %s returning *",
     # (post.title, post.content, post.published, str(id)))
