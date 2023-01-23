@@ -1,5 +1,4 @@
-from turtle import title
-from typing import Optional
+from typing import Optional, List
 from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
 from pydantic import BaseModel
@@ -44,14 +43,14 @@ def find_post(id):
 def root():
     return {"message": "Hello World"}
 
-@app.get("/posts")
+@app.get("/posts", response_model=List[schemas.Post])
 def get_posts(db: Session = Depends(get_db)):
     # cursor.execute('''Select * from posts''')
     # posts = cursor.fetchall()
     posts = db.query(models.Post).all()
     return posts
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED) # add status code to the decorator for default values
+@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post) # add status code to the decorator for default values
 def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
     # DO NOT USE FSTRINGS: they make us vulnerable to SQL Injection attacks
     # cursor.execute("""Insert into posts (title, content, published, owner_id) values (%s, %s, %s, 11) returning * """,(post.title, post.content, post.published))
@@ -66,7 +65,7 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
 
     return new_post # return the data
 
-@app.get("/posts/{id}") # path parameter
+@app.get("/posts/{id}", response_model=schemas.Post) # path parameter
 def get_post(id: int, response: Response, db: Session = Depends(get_db)):
     # cursor.execute('''Select * from posts where id = %s ''', (str(id)))
     # post = cursor.fetchone()
@@ -99,7 +98,7 @@ def delete_posts(id: int, response: Response, db: Session = Depends(get_db)):
 
 # Put method requires all the fields to be sent again
 # whereas the patch method requires for only the changed ones
-@app.put("/posts/{id}")
+@app.put("/posts/{id}", response_model=schemas.Post)
 def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
     
     # cursor.execute("update posts set title = %s, content = %s, published = %s, owner_id = 11 where id = %s returning *",
