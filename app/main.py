@@ -104,24 +104,28 @@ def delete_posts(id: int, response: Response, db: Session = Depends(get_db)):
 
     post.delete(synchronize_session = False)
     db.commit()
-    
+
     # We do not return a message!
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 # Put method requires all the fields to be sent again
 # whereas the patch method requires for only the changed ones
 @app.put("/posts/{id}")
-def update_post(id: int, post: Post):
+def update_post(id: int, updated_post: Post, db: Session = Depends(get_db)):
     
-    cursor.execute("update posts set title = %s, content = %s, published = %s, owner_id = 11 where id = %s returning *",
-    (post.title, post.content, post.published, str(id)))
+    # cursor.execute("update posts set title = %s, content = %s, published = %s, owner_id = 11 where id = %s returning *",
+    # (post.title, post.content, post.published, str(id)))
+    # updated_post = cursor.fetchone()
+    # conn.commit()
 
-    updated_post = cursor.fetchone()
+    post_query = db.query(models.Post).filter(models.Post.id == id)
+    post = post_query.first()
 
-    if updated_post == None:
+    if post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post does not exists!!")
 
-    conn.commit()
+    post_query.update(updated_post.dict(), synchronize_session = False)
+    db.commit()
 
-    return {'data': updated_post}
+    return {'data': post_query.first()}
     
