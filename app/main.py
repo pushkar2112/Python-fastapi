@@ -49,7 +49,7 @@ def get_posts(db: Session = Depends(get_db)):
     # cursor.execute('''Select * from posts''')
     # posts = cursor.fetchall()
     posts = db.query(models.Post).all()
-    return {"data": posts}
+    return posts
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED) # add status code to the decorator for default values
 def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
@@ -64,7 +64,7 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
     db.commit() # Commit the new post
     db.refresh(new_post) # Retrieve the new post and save it to the variable again
 
-    return {"data": new_post} # return the data
+    return new_post # return the data
 
 @app.get("/posts/{id}") # path parameter
 def get_post(id: int, response: Response, db: Session = Depends(get_db)):
@@ -77,7 +77,7 @@ def get_post(id: int, response: Response, db: Session = Depends(get_db)):
         # response.status_code = status.HTTP_404_NOT_FOUND
         # return {"message": f"post with id: {id} was not found!!"}
 
-    return {"post_details": post}
+    return post
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_posts(id: int, response: Response, db: Session = Depends(get_db)):
@@ -116,5 +116,5 @@ def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends
     post_query.update(updated_post.dict(), synchronize_session = False)
     db.commit()
 
-    return {'data': post_query.first()}
+    return post_query.first()
     
