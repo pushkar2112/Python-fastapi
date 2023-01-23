@@ -1,0 +1,35 @@
+{
+    "emmet.includeLanguages": {
+        "python": "python"
+    },
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.autoImportUserSymbols": true,
+    "python.analysis.completeFunctionParens": true,
+    "python.analysis.extraPaths": [
+        "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages"
+    ],
+    "python.analysis.packageIndexDepths": [
+
+        {
+            "name": "sklearn",
+            "depth": 2
+        },
+        {
+            "name": "matplotlib",
+            "depth": 2
+        },
+        {
+            "name": "scipy",
+            "depth": 2
+        },
+        {
+            "name": "django",
+            "depth": 2
+        },
+        {
+            "name": "sqlalchemy",
+            "depth": 3
+        }
+    ]
+}
