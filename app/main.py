@@ -78,9 +78,10 @@ def create_posts(post: Post, db: Session = Depends(get_db)):
     return {"data": new_post} # return the data
 
 @app.get("/posts/{id}") # path parameter
-def get_post(id: int, response: Response):
-    cursor.execute('''Select * from posts where id = %s ''', (str(id)))
-    post = cursor.fetchone()
+def get_post(id: int, response: Response, db: Session = Depends(get_db)):
+    # cursor.execute('''Select * from posts where id = %s ''', (str(id)))
+    # post = cursor.fetchone()
+    post = db.query(models.Post).filter(models.Post.id == id).first()
     
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id: {id} was not found!")
