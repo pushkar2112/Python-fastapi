@@ -91,17 +91,20 @@ def get_post(id: int, response: Response, db: Session = Depends(get_db)):
     return {"post_details": post}
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_posts(id: int, response: Response):
+def delete_posts(id: int, response: Response, db: Session = Depends(get_db)):
     #deleting post
-    
-    cursor.execute("""Delete from posts where id = %s returning * """, (str(id)))
-    deleted_post = cursor.fetchone()
+    # cursor.execute("""Delete from posts where id = %s returning * """, (str(id)))
+    # deleted_post = cursor.fetchone()
+    # conn.commit()
 
-    if deleted_post == None:
+    post = db.query(models.Post).filter(models.Post.id == id)
+
+    if post.first() == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post does not exists!!")
-    
-    conn.commit()
 
+    post.delete(synchronize_session = False)
+    db.commit()
+    
     # We do not return a message!
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
