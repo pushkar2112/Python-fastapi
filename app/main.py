@@ -9,6 +9,7 @@ import time
 from sqlalchemy.orm import Session
 from . import models, schemas, utils
 from .database import engine, get_db
+from .routers import post, user
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -39,103 +40,11 @@ def find_post(id):
             return p
 
 # Api routes
+app.include_router(post.router)
+app.include_router(user.router)
+
 @app.get("/")
 def root():
     return {"message": "Hello World"}
 
-@app.get("/posts", response_model=List[schemas.Post])
-def get_posts(db: Session = Depends(get_db)):
-    # cursor.execute('''Select * from posts''')
-    # posts = cursor.fetchall()
-    posts = db.query(models.Post).all()
-    return posts
-
-@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post) # add status code to the decorator for default values
-def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
-    # DO NOT USE FSTRINGS: they make us vulnerable to SQL Injection attacks
-    # cursor.execute("""Insert into posts (title, content, published, owner_id) values (%s, %s, %s, 11) returning * """,(post.title, post.content, post.published))
-
-    # new_post = cursor.fetchone()
-    # conn.commit()
-    # print(**post.dict()) Dictionary unpacking
-    new_post = models.Post(**post.dict())
-    db.add(new_post) # Add the new post to commit
-    db.commit() # Commit the new post
-    db.refresh(new_post) # Retrieve the new post and save it to the variable again
-
-    return new_post # return the data
-
-@app.get("/posts/{id}", response_model=schemas.Post) # path parameter
-def get_post(id: int, response: Response, db: Session = Depends(get_db)):
-    # cursor.execute('''Select * from posts where id = %s ''', (str(id)))
-    # post = cursor.fetchone()
-    post = db.query(models.Post).filter(models.Post.id == id).first()
     
-    if not post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id: {id} was not found!")
-        # response.status_code = status.HTTP_404_NOT_FOUND
-        # return {"message": f"post with id: {id} was not found!!"}
-
-    return post
-
-@app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_posts(id: int, response: Response, db: Session = Depends(get_db)):
-    #deleting post
-    # cursor.execute("""Delete from posts where id = %s returning * """, (str(id)))
-    # deleted_post = cursor.fetchone()
-    # conn.commit()
-
-    post = db.query(models.Post).filter(models.Post.id == id)
-
-    if post.first() == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post does not exists!!")
-
-    post.delete(synchronize_session = False)
-    db.commit()
-
-    # We do not return a message!
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-# Put method requires all the fields to be sent again
-# whereas the patch method requires for only the changed ones
-@app.put("/posts/{id}", response_model=schemas.Post)
-def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
-    
-    # cursor.execute("update posts set title = %s, content = %s, published = %s, owner_id = 11 where id = %s returning *",
-    # (post.title, post.content, post.published, str(id)))
-    # updated_post = cursor.fetchone()
-    # conn.commit()
-
-    post_query = db.query(models.Post).filter(models.Post.id == id)
-    post = post_query.first()
-
-    if post == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post does not exists!!")
-
-    post_query.update(updated_post.dict(), synchronize_session = False)
-    db.commit()
-
-    return post_query.first()
-    
-@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut) # add status code to the decorator for default values
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    
-    # Hash the password - user.password
-    hashed_password = utils.hash(user.password)
-    user.password = hashed_password
-
-    new_user = models.User(**user.dict())
-    db.add(new_user) # Add the new user to commit
-    db.commit() # Commit the new user
-    db.refresh(new_user) # Retrieve the new user and save it to the variable again
-
-    return new_user
-
-@app.get('/users/{id}', response_model=schemas.UserOut) # Response model goes into the route decorator
-def get_user(id: int, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.id == id).first()
-
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id: {id} does not exist!")
-
-    return user
