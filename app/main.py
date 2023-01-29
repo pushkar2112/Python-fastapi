@@ -7,7 +7,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
 from sqlalchemy.orm import Session
-from . import models, schemas
+from . import models, schemas, utils
 from .database import engine, get_db
 
 models.Base.metadata.create_all(bind=engine)
@@ -119,9 +119,15 @@ def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends
     
 @app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut) # add status code to the decorator for default values
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    
+    # Hash the password - user.password
+    hashed_password = utils.hash(user.password)
+    user.password = hashed_password
+
     new_user = models.User(**user.dict())
     db.add(new_user) # Add the new user to commit
     db.commit() # Commit the new user
     db.refresh(new_user) # Retrieve the new user and save it to the variable again
 
     return new_user
+
