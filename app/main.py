@@ -117,3 +117,11 @@ def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends
 
     return post_query.first()
     
+@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut) # add status code to the decorator for default values
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    new_user = models.User(**user.dict())
+    db.add(new_user) # Add the new user to commit
+    db.commit() # Commit the new user
+    db.refresh(new_user) # Retrieve the new user and save it to the variable again
+
+    return new_user
