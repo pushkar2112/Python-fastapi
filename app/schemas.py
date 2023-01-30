@@ -28,3 +28,7 @@ class UserOut(BaseModel):
 
     class Config:
         orm_mode = True # Used to return the data as a dict
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
