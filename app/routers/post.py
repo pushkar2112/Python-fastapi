@@ -7,21 +7,21 @@ from ..database import get_db
 router = APIRouter(prefix="/posts", tags=['Posts'])
 
 @router.get("/", response_model=List[schemas.Post])
-def get_posts(db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     # cursor.execute('''Select * from posts''')
     # posts = cursor.fetchall()
     posts = db.query(models.Post).all()
     return posts
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post) # add status code to the decorator for default values
-def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)): # Get current user dependecy to restric access
+def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), current_user = Depends(oauth2.get_current_user)): # Get current user dependecy to restric access
     # DO NOT USE FSTRINGS: they make us vulnerable to SQL Injection attacks
     # cursor.execute("""Insert into posts (title, content, published, owner_id) values (%s, %s, %s, 11) returning * """,(post.title, post.content, post.published))
 
     # new_post = cursor.fetchone()
     # conn.commit()
     # print(**post.dict()) Dictionary unpacking
-    print(user_id)
+    print(current_user.email)
     new_post = models.Post(**post.dict())
     db.add(new_post) # Add the new post to commit
     db.commit() # Commit the new post
@@ -30,7 +30,7 @@ def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db), user_i
     return new_post # return the data
 
 @router.get("/{id}", response_model=schemas.Post) # path parameter
-def get_post(id: int, response: Response, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+def get_post(id: int, response: Response, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     # cursor.execute('''Select * from posts where id = %s ''', (str(id)))
     # post = cursor.fetchone()
     post = db.query(models.Post).filter(models.Post.id == id).first()
@@ -43,7 +43,7 @@ def get_post(id: int, response: Response, db: Session = Depends(get_db), user_id
     return post
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_posts(id: int, response: Response, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+def delete_posts(id: int, response: Response, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     #deleting post
     # cursor.execute("""Delete from posts where id = %s returning * """, (str(id)))
     # deleted_post = cursor.fetchone()
@@ -63,7 +63,7 @@ def delete_posts(id: int, response: Response, db: Session = Depends(get_db), use
 # Put method requires all the fields to be sent again
 # whereas the patch method requires for only the changed ones
 @router.put("/{id}", response_model=schemas.Post)
-def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db), user_id: int = Depends(oauth2.get_current_user)):
+def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     
     # cursor.execute("update posts set title = %s, content = %s, published = %s, owner_id = 11 where id = %s returning *",
     # (post.title, post.content, post.published, str(id)))
