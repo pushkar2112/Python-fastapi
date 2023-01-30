@@ -13,7 +13,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 SECRET_KEY = "f3956f6dfd481c7383337f0e47dd92c9835f368991e6b9de2224b91e9b4422cf"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 def create_access_token(data: dict): # Create JWT Token ; data : the data that we want to embed in the token, email here
     to_encode = data.copy()

@@ -6,7 +6,7 @@ from ..database import get_db
 
 router = APIRouter(tags=['Authentication'])
 
-@router.post('/login')
+@router.post('/login', response_model=schemas.Token) # Token response model
 def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
 
     # OAUth2PasswordRequestForm returns {
