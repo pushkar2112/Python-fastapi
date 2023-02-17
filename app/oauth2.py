@@ -7,6 +7,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from . import schemas, models
 from .database import get_db
+from .config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -14,9 +15,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 # ALGORITH
 # EXPIRATION TIME
 
-SECRET_KEY = "f3956f6dfd481c7383337f0e47dd92c9835f368991e6b9de2224b91e9b4422cf"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+SECRET_KEY = settings.secret_key
+ALGORITHM = settings.algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
 def create_access_token(data: dict): # Create JWT Token ; data : the data that we want to embed in the token, email here
     to_encode = data.copy()
