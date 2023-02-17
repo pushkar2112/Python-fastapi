@@ -10,8 +10,7 @@ router = APIRouter(prefix="/posts", tags=['Posts'])
 def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     # cursor.execute('''Select * from posts''')
     # posts = cursor.fetchall()
-    # posts = db.query(models.Post).all()
-    posts = db.query(models.Post).filter(models.Post.owner_id == current_user.id).all() # Fetch user specific posts only; posts of that user only
+    posts = db.query(models.Post).all()
     return posts
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post) # add status code to the decorator for default values
@@ -39,9 +38,6 @@ def get_post(id: int, response: Response, db: Session = Depends(get_db), current
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id: {id} was not found!")
         # response.status_code = status.HTTP_404_NOT_FOUND
         # return {"message": f"post with id: {id} was not found!!"}
-
-    if post.owner_id != current_user.id: # See user specific posts
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not Authorised to perform requested action!")
 
     return post
 
