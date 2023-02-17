@@ -7,10 +7,11 @@ from ..database import get_db
 router = APIRouter(prefix="/posts", tags=['Posts'])
 
 @router.get("/", response_model=List[schemas.Post])
-def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user), Limit: int = 10):
     # cursor.execute('''Select * from posts''')
     # posts = cursor.fetchall()
-    posts = db.query(models.Post).all()
+    print(Limit)
+    posts = db.query(models.Post).limit(Limit).all()
     return posts
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post) # add status code to the decorator for default values
