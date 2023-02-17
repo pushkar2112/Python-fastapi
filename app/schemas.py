@@ -11,18 +11,6 @@ class PostBase(BaseModel):
 class PostCreate(PostBase):
     pass
 
-class Post(PostBase):
-    id: int
-    created_at: datetime
-    owner_id: int
-
-    class Config:
-        orm_mode = True # Used to return the data as a dict
-
-class UserCreate(BaseModel):
-    email: EmailStr
-    password: str
-
 class UserOut(BaseModel):
     id: int
     email: EmailStr
@@ -30,6 +18,19 @@ class UserOut(BaseModel):
 
     class Config:
         orm_mode = True # Used to return the data as a dict
+
+class Post(PostBase):
+    id: int
+    created_at: datetime
+    owner_id: int
+    owner: UserOut
+
+    class Config:
+        orm_mode = True # Used to return the data as a dict
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
 
 class UserLogin(BaseModel):
     email: EmailStr
