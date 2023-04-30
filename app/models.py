@@ -23,4 +23,10 @@ class User(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
-    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()')) # server_default=text('now()') to set the default value to now
+
+class Vote(Base):
+    __tablename__ = "votes" # Table name
+
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True) 
+    post_id = Column(Integer, ForeignKey("posts.id", ondelete="CASCADE"), primary_key=True) # ondelete cascade to delete all the votes if the post is deleted
